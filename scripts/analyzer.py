@@ -1,4 +1,5 @@
 import csv
+import sys
 
 def load_csv(filepath):
     f = open(filepath)
@@ -34,18 +35,17 @@ def bytes_by_ip(rows):
         totals[ip] += r['bytes']
     return totals
 
-def top_talker(totals):
-    best = None
-    best_ip = None
-    for ip, b in totals.items():
-        if best is None or b > best:
-            best = b
-            best_ip = ip
-    return best_ip, best
+def print_report(rows):
+    print(f"total: {len(rows)}")
+    print(f"unique IPs: {get_unique_ips(rows)}")
+    print(f"actions: {count_actions(rows)}")
+    totals = bytes_by_ip(rows)
+    ip, b = top_talker(totals)
+    print(f"top talker: {ip} {b}B")
 
-rows = load_csv('data/sample_log.csv')
-print(f"unique IPs: {get_unique_ips(rows)}")
-print(f"actions: {count_actions(rows)}")
-totals = bytes_by_ip(rows)
-ip, b = top_talker(totals)
-print(f"top talker: {ip} {b}B")
+if len(sys.argv) < 2:
+    print("usage: python scripts/analyzer.py <csv_file>")
+    sys.exit(1)
+
+rows = load_csv(sys.argv[1])
+print_report(rows)
