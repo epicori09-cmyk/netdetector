@@ -35,6 +35,26 @@ def bytes_by_ip(rows):
         totals[ip] += r['bytes']
     return totals
 
+def top_talker(totals):
+    best = None
+    best_ip = None
+    for ip, b in totals.items():
+        if best is None or b > best:
+            best = b
+            best_ip = ip
+    return best_ip, best
+
+def save_report(rows, output_file):
+    with open(output_file, 'w') as f:
+        f.write(f"total: {len(rows)}\n")
+        ips = get_unique_ips(rows)
+        f.write(f"unique IPs: {ips}\n")
+        counts = count_actions(rows)
+        f.write(f"actions: {counts}\n")
+        totals = bytes_by_ip(rows)
+        ip, b = top_talker(totals)
+        f.write(f"top talker: {ip} {b}B\\n")
+
 def print_report(rows):
     print(f"total: {len(rows)}")
     print(f"unique IPs: {get_unique_ips(rows)}")
@@ -44,8 +64,12 @@ def print_report(rows):
     print(f"top talker: {ip} {b}B")
 
 if len(sys.argv) < 2:
-    print("usage: python scripts/analyzer.py <csv_file>")
+    print("usage: python scripts/analyzer.py <csv_file> [output_file]")
     sys.exit(1)
 
 rows = load_csv(sys.argv[1])
-print_report(rows)
+if len(sys.argv) >= 3:
+    save_report(rows, sys.argv[2])
+    print(f"saved to {sys.argv[2]}")
+else:
+    print_report(rows)
