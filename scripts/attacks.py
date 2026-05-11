@@ -15,3 +15,12 @@ def check_port_scan(stats):
     if stats["unique_dst_port_count"] > 15 and stats["packet_count"] > 20:
         alerts.append(("PORT_SCAN", f"{stats['unique_dst_port_count']} ports"))
     return alerts
+
+def check_ssh_bruteforce(window):
+    ssh = 0
+    for p in window:
+        if p.get("dst_port") == 22:
+            ssh += 1
+    if ssh > 20:
+        return [("SSH_BRUTEFORCE", f"{ssh} attempts")]
+    return []
