@@ -1,4 +1,5 @@
 # attack detection rules
+from collections import defaultdict
 
 def check_flood(stats):
     alerts = []
@@ -24,3 +25,14 @@ def check_ssh_bruteforce(window):
     if ssh > 20:
         return [("SSH_BRUTEFORCE", f"{ssh} attempts")]
     return []
+
+def check_dns_amplification(window):
+    ip_dns = defaultdict(int)
+    for p in window:
+        if p.get("dst_port") == 53 or p.get("src_port") == 53:
+            ip_dns[p.get("dst_ip", "")] += p.get("length", 0)
+    alerts = []
+    for ip, b in ip_dns.items():
+        if b > 10000:
+            alerts.append(("DNS_AMPLIFICATION", f"{ip} got {b}B DNS"))
+    return alerts
